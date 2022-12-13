@@ -1,0 +1,33 @@
+name:                haskdaq
+version:             0.1.0.0
+github:              "stephenswat/haskdaq"
+license:             MPL-2.0
+author:              "Stephen Nicholas Swatman"
+maintainer:          "stephen.nicholas.swatman@cern.ch"
+copyright:           "2022 CERN"
+
+extra-source-files:
+  - README.md
+
+dependencies:
+  - base >= 4.7 && < 5
+  - bytestring
+  - attoparsec
+  - attoparsec-binary
+  - zlib
+
+ghc-options:
+  - -Wall
+  - -Wextra
+  - -O2
+
+library:
+  source-dirs: src
+
+executables:
+  haskdaq-exe:
+    main: Main.hs
+    source-dirs: app
+    dependencies:
+      - haskdaq
+      - pretty-show
