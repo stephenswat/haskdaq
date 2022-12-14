@@ -1,6 +1,6 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 
-module Data.Haskdaq.EventStorage (FileContents, parserFileContents) where
+module Data.Haskdaq.EventStorage (MergedFile, parserMergedFile) where
 
 import Data.Bits ((.|.), shift)
 import Data.Word (Word32, Word64)
@@ -27,8 +27,8 @@ data MergedSubfileHeader
     }
     deriving Show
 
-data MergedFileHeader a
-    = MergedFileHeader
+data MergedFile a
+    = MergedFile
     { numEvents :: Word32
     , numEventsSequence :: Word32
     , numFiles :: Word32
@@ -43,12 +43,6 @@ data MergedFileHeader a
     , extraInfo :: String
     , subFileHeaders :: [MergedSubfileHeader]
     , subFiles :: [DataFile a]
-    }
-    deriving Show
-
-data FileContents a
-    = MergedFile
-    { header :: MergedFileHeader a
     }
     deriving Show
 
@@ -144,8 +138,8 @@ parserMergedFileSubFileHeader = do
         , fileName=map (w2c . fromIntegral) fn
         }
 
-parserMergedFileHeader :: Parser a -> Parser (MergedFileHeader a)
-parserMergedFileHeader f = do
+parserMergedFile :: Parser a -> Parser (MergedFile a)
+parserMergedFile f = do
     -- Read the file header, which must be 0x1ba2baba.
     _ <- word32le 0x1ba2baba;
 
@@ -208,7 +202,7 @@ parserMergedFileHeader f = do
     -- Read the actual subfiles.
     sf <- count 1 (parserDataFile f);
 
-    return MergedFileHeader
+    return MergedFile
         { numEvents=ne
         , numEventsSequence=se
         , numFiles=nf
@@ -224,9 +218,3 @@ parserMergedFileHeader f = do
         , subFileHeaders=sh
         , subFiles=sf
         }
-
-parserFileContents :: Parser a -> Parser (FileContents a)
-parserFileContents f = do
-    hd <- parserMergedFileHeader f;
-
-    return (MergedFile { header=hd })
